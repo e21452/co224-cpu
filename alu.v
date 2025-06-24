@@ -1,3 +1,4 @@
+`include "multiplier.v"
 // create module for FORWARD funtional unit
 module foward_fu (RESULT, DATA2);
 
@@ -63,13 +64,14 @@ module alu (ZERO, RESULT, DATA1, DATA2, SELECT);
     output reg ZERO;            // 8-bit output RESULT, here I declare as a reg because I need to assign value for it
 
     // 4 8-bit input wires to get the RESULT of FORWARD, ADD, AND and OR
-    wire [7:0] forward_result, add_result, and_result, or_result;
+    wire [7:0] forward_result, add_result, and_result, or_result, mul_result;
 
     // instantiations for FORWARD, ADD, AND and OR
     foward_fu myforward(forward_result, DATA2);
     add_fu myadd(add_result, DATA1, DATA2);
     and_fu myand(and_result, DATA1, DATA2);
     or_fu myor(or_result, DATA1, DATA2);
+    multiplier mul(DATA1, DATA2, mul_result);
 
     // create an always block with senciticve list as all
     always @ (*) begin
@@ -79,6 +81,7 @@ module alu (ZERO, RESULT, DATA1, DATA2, SELECT);
             3'b001: RESULT = add_result;        // if select is 001 then, assign RESULT to add_result
             3'b010: RESULT = and_result;        // if select is 010 then, assign RESULT to and_result
             3'b011: RESULT = or_result;         // if select is 011 then, assign RESULT to or_result
+            3'b100: RESULT = mul_result;        // if select is 100 then, assign RESULT to mul_result
             //default: RESULT = 8'b0000_0000;     // reserved for future
         endcase
         

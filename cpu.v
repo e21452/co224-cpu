@@ -54,6 +54,11 @@ module controlUnit (WRITEENABLE, ALUOP, SHIFT_OP, S_MUX1, S_MUX2, SHIFT_MUX, BRA
 
         #1
         case (OPCODE)
+            8'b0000_1000: 
+                        begin 
+                            ALUOP = 3'b100; // add
+                            WRITEENABLE = 1;
+                        end
             8'b0000_0010: 
                         begin 
                             ALUOP = 3'b001; // add
