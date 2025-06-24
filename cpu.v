@@ -36,10 +36,10 @@ module extender (
     
 endmodule
 
-module controlUnit (WRITEENABLE, ALUOP, S_MUX1, S_MUX2, BRANCH, JUMP, OPCODE);
+module controlUnit (WRITEENABLE, ALUOP, SHIFT_OP, S_MUX1, S_MUX2, SHIFT_MUX, BRANCH, JUMP, OPCODE);
 
     output reg WRITEENABLE, S_MUX1, S_MUX2, BRANCH, JUMP; //Write_enable, MUX1_select, MUX2_select
-    output reg [2:0] ALUOP;                               //ALU operation selection
+    output reg [2:0] ALUOP, SHIFT_OP;                               //ALU operation selection
     input [7:0] OPCODE;                                   //Opcode from the instruction
 
     always @(*) begin
@@ -48,6 +48,7 @@ module controlUnit (WRITEENABLE, ALUOP, S_MUX1, S_MUX2, BRANCH, JUMP, OPCODE);
         S_MUX2 = 1;
         BRANCH = 0;
         JUMP = 0;
+        SHIFT_OP = 0;
 
         #1
         case (OPCODE)
@@ -99,6 +100,35 @@ module controlUnit (WRITEENABLE, ALUOP, S_MUX1, S_MUX2, BRANCH, JUMP, OPCODE);
                             S_MUX1 = 1;
                             BRANCH = 1;
                         end
+            8'b1000_0001:          // sll
+                        begin
+                            ALUOP = 3'b000; 
+                            WRITEENABLE = 1;
+                            SHIFT_OP = OPCODE[6:4]
+                            SHIFT_MUX = 1;
+                        end
+            8'b1001_0001:          // slr
+                        begin
+                            ALUOP = 3'b000; 
+                            WRITEENABLE = 1;
+                            SHIFT_OP = OPCODE[6:4]
+                            SHIFT_MUX = 1;
+                        end
+            8'b1011_0001:          // ror
+                        begin
+                            ALUOP = 3'b000; 
+                            WRITEENABLE = 1;
+                            SHIFT_OP = OPCODE[6:4]
+                            SHIFT_MUX = 1;
+                        end
+            8'b1101_0001:          // sar
+                        begin
+                            ALUOP = 3'b000; 
+                            WRITEENABLE = 1;
+                            SHIFT_OP = OPCODE[6:4]
+                            SHIFT_MUX = 1;
+                        end
+
         endcase
     end
     
@@ -120,19 +150,22 @@ module cpu (PC, INSTRUCTION, CLK, RESET);
     input CLK, RESET;
 
     reg [7:0] OPCODE, RD, RT, RS;  //Instruction -> | OPCODE | RD | RT | RS/IMM |
-    wire WRITEENABLE, S_MUX1, S_MUX2, BRANCH, JUMP, ZERO, ANDOUT, OROUT, XOROUT;    // Signals for write enable, MUX1 select, MUX2 select
-    wire [2:0] ALUOP;                   // ALU operation signal line
-    wire [7:0] OUT1, OUT2, COUT, MUX1_OUT, MUX2_OUT, RESULT; // register file out1,out2, complemented value, MUX1 output,MUX2 output, ALU result
+    wire WRITEENABLE, S_MUX1, S_MUX2, SHIFT_MUX, BRANCH, JUMP, ZERO, ANDOUT, OROUT, XOROUT;    // Signals for write enable, MUX1 select, MUX2 select
+    wire [2:0] ALUOP, SHIFT_OP;                   // ALU operation signal line
+    wire [7:0] OUT1, OUT2, COUT, MUX1_OUT, MUX2_OUT, SHIFT_MUX_OUT, RESULT, SHIFTED_VALUE; // register file out1,out2, complemented value, MUX1 output,MUX2 output, ALU result
     reg [2:0] INADDRESS, OUT1ADDRESS, OUT2ADDRESS; // Address lines for register file
     reg BRANCH_SIGN;
     
     wire [31:0] PCADDR, C_FOUR, PCADDROUT, TARGETADDROUT, EADDR;
 
     regPC myRegPC(PC, RESET, CLK, PCADDR);
-    controlUnit myControlUnit(WRITEENABLE, ALUOP, S_MUX1, S_MUX2, BRANCH, JUMP, OPCODE);
+    controlUnit myControlUnit(WRITEENABLE, ALUOP, SHIFT_OP, S_MUX1, S_MUX2,SHIFT_MUX, BRANCH, JUMP, OPCODE);
     reg_file myRegFile(OUT1, OUT2, RESULT, INADDRESS, OUT1ADDRESS, OUT2ADDRESS, WRITEENABLE, CLK, RESET);
     complement myComplement(COUT, OUT2);
     alu myAlu(ZERO, RESULT, OUT1, MUX2_OUT, ALUOP);
+
+    b8_shifter shifter(OUT,RS[2:0], SHIFT_OP, SHIFTED_VALUE);
+
     addr myPcAddr(PCADDROUT, PC, C_FOUR); 
     addr myTargetAddr(TARGETADDROUT, PCADDROUT, EADDR);
     extender myExtender(EADDR, RD);
@@ -142,6 +175,7 @@ module cpu (PC, INSTRUCTION, CLK, RESET);
 
     assign MUX1_OUT = S_MUX1 ? COUT : OUT2;
     assign MUX2_OUT = S_MUX2 ? MUX1_OUT : RS;
+    assign SHIFT_MUX_OUT = SHIFT_MUX ? SHIFTED_VALUE : MUX2_OUT;
     assign C_FOUR = 4;
     assign PCADDR = OROUT ? TARGETADDROUT : PCADDROUT;
 
