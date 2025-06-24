@@ -1,5 +1,6 @@
 `include "alu.v"
 `include "regFile.v"
+`include "bit8Shifter.v"
 
 module regPC (PC, RESET, CLK, ADDRESS);  //Program Counter that incremented by 4
     
@@ -38,7 +39,7 @@ endmodule
 
 module controlUnit (WRITEENABLE, ALUOP, SHIFT_OP, S_MUX1, S_MUX2, SHIFT_MUX, BRANCH, JUMP, OPCODE);
 
-    output reg WRITEENABLE, S_MUX1, S_MUX2, BRANCH, JUMP; //Write_enable, MUX1_select, MUX2_select
+    output reg WRITEENABLE, S_MUX1, S_MUX2,SHIFT_MUX, BRANCH, JUMP; //Write_enable, MUX1_select, MUX2_select
     output reg [2:0] ALUOP, SHIFT_OP;                               //ALU operation selection
     input [7:0] OPCODE;                                   //Opcode from the instruction
 
@@ -49,6 +50,7 @@ module controlUnit (WRITEENABLE, ALUOP, SHIFT_OP, S_MUX1, S_MUX2, SHIFT_MUX, BRA
         BRANCH = 0;
         JUMP = 0;
         SHIFT_OP = 0;
+        SHIFT_MUX = 0;
 
         #1
         case (OPCODE)
@@ -104,28 +106,28 @@ module controlUnit (WRITEENABLE, ALUOP, SHIFT_OP, S_MUX1, S_MUX2, SHIFT_MUX, BRA
                         begin
                             ALUOP = 3'b000; 
                             WRITEENABLE = 1;
-                            SHIFT_OP = OPCODE[6:4]
+                            SHIFT_OP = OPCODE[6:4];
                             SHIFT_MUX = 1;
                         end
             8'b1001_0001:          // slr
                         begin
                             ALUOP = 3'b000; 
                             WRITEENABLE = 1;
-                            SHIFT_OP = OPCODE[6:4]
+                            SHIFT_OP = OPCODE[6:4];
                             SHIFT_MUX = 1;
                         end
             8'b1011_0001:          // ror
                         begin
                             ALUOP = 3'b000; 
                             WRITEENABLE = 1;
-                            SHIFT_OP = OPCODE[6:4]
+                            SHIFT_OP = OPCODE[6:4];
                             SHIFT_MUX = 1;
                         end
             8'b1101_0001:          // sar
                         begin
                             ALUOP = 3'b000; 
                             WRITEENABLE = 1;
-                            SHIFT_OP = OPCODE[6:4]
+                            SHIFT_OP = OPCODE[6:4];
                             SHIFT_MUX = 1;
                         end
 
@@ -164,7 +166,7 @@ module cpu (PC, INSTRUCTION, CLK, RESET);
     complement myComplement(COUT, OUT2);
     alu myAlu(ZERO, RESULT, OUT1, MUX2_OUT, ALUOP);
 
-    b8_shifter shifter(OUT,RS[2:0], SHIFT_OP, SHIFTED_VALUE);
+    b8_shifter shifter(OUT1,RS[2:0], SHIFT_OP, SHIFTED_VALUE);
 
     addr myPcAddr(PCADDROUT, PC, C_FOUR); 
     addr myTargetAddr(TARGETADDROUT, PCADDROUT, EADDR);
