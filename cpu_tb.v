@@ -36,9 +36,13 @@ module cpu_tb;
         {instr_mem[10'd19], instr_mem[10'd18], instr_mem[10'd17], instr_mem[10'd16]} = 32'b00000111_00010100_00000100_00000010;     //  beq 0x14 2 4	
         {instr_mem[10'd103], instr_mem[10'd102], instr_mem[10'd101], instr_mem[10'd100]} = 32'b00000000_00000001_00000000_00000001;     //  loadi 1 0x01	; r1 = 1
         {instr_mem[10'd107], instr_mem[10'd106], instr_mem[10'd105], instr_mem[10'd104]} = 32'b10000111_00010111_00000010_00000001;     // bne 0x17 2 1
-        {instr_mem[10'd203], instr_mem[10'd202], instr_mem[10'd201], instr_mem[10'd200]} = 32'b00000010_00000010_00000010_00000001;     //  add 2 2 1		; r2 = r2 + r1 (r2++)
+        {instr_mem[10'd203], instr_mem[10'd202], instr_mem[10'd201], instr_mem[10'd200]} = 32'b1000_0001_00000101_00000000_00000010;     //  sll 5 0 0x2		;
+        {instr_mem[10'd207], instr_mem[10'd206], instr_mem[10'd205], instr_mem[10'd204]} = 32'b1001_0001_00000110_00000000_00000011;     //  slr 6 0 0x3		;
+        {instr_mem[10'd211], instr_mem[10'd210], instr_mem[10'd209], instr_mem[10'd208]} = 32'b1011_0001_00000111_00000000_00000111;     //  ror 7 0 0x7		;
+        {instr_mem[10'd215], instr_mem[10'd214], instr_mem[10'd213], instr_mem[10'd212]} = 32'b1101_0001_00000100_00000000_00000010;     //  sal 4 0 0x2		;
 
-        // METHOD 2: loading instr_mem content from instr_mem.mem file
+
+        // METHOD 2: loading instr_mem content from instr_mem.mem files
         // $readmemb("programmer/instr_mem.mem", instr_mem);
     end
     

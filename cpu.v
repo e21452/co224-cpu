@@ -164,7 +164,7 @@ module cpu (PC, INSTRUCTION, CLK, RESET);
     controlUnit myControlUnit(WRITEENABLE, ALUOP, SHIFT_OP, S_MUX1, S_MUX2,SHIFT_MUX, BRANCH, JUMP, OPCODE);
     reg_file myRegFile(OUT1, OUT2, RESULT, INADDRESS, OUT1ADDRESS, OUT2ADDRESS, WRITEENABLE, CLK, RESET);
     complement myComplement(COUT, OUT2);
-    alu myAlu(ZERO, RESULT, OUT1, MUX2_OUT, ALUOP);
+    alu myAlu(ZERO, RESULT, OUT1, SHIFT_MUX_OUT, ALUOP);
 
     b8_shifter shifter(OUT1,RS[2:0], SHIFT_OP, SHIFTED_VALUE);
 
