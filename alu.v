@@ -71,7 +71,7 @@ module alu (ZERO, RESULT, DATA1, DATA2, SELECT);
     add_fu myadd(add_result, DATA1, DATA2);
     and_fu myand(and_result, DATA1, DATA2);
     or_fu myor(or_result, DATA1, DATA2);
-    multiplier mul(DATA1, DATA2, mul_result);
+    array_multiplier mul(DATA1, DATA2, mul_result);
 
     // create an always block with senciticve list as all
     always @ (*) begin
