@@ -52,6 +52,8 @@ module cpu_tb;
     -----
     */
     cpu mycpu(PC, INSTRUCTION, CLK, RESET);
+    data_memory myDataMemory(CLK, RESET, MEM_READ_ENABLE, MEM_WRITE_ENABLE, RESULT, OUT1, MDREAD , BUSYWAIT); // Data memory module
+
 
     // always @(posedge CLK ) begin
         
