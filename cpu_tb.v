@@ -2,6 +2,7 @@
 // Design: Testbench of Integrated CPU of Simple Processor
 // Author: Isuru Nawinne
 `include "cpu.v"
+`include "dcache.v"
 
 module cpu_tb;
 
@@ -36,10 +37,10 @@ module cpu_tb;
         {instr_mem[10'd19], instr_mem[10'd18], instr_mem[10'd17], instr_mem[10'd16]} = 32'b00000111_00010100_00000100_00000010;     //  beq 0x14 2 4	
         {instr_mem[10'd103], instr_mem[10'd102], instr_mem[10'd101], instr_mem[10'd100]} = 32'b00000000_00000001_00000000_00000001;     //  loadi 1 0x01	; r1 = 1
         {instr_mem[10'd107], instr_mem[10'd106], instr_mem[10'd105], instr_mem[10'd104]} = 32'b10000111_00010111_00000010_00000001;     // bne 0x17 2 1
-        {instr_mem[10'd203], instr_mem[10'd202], instr_mem[10'd201], instr_mem[10'd200]} = 32'b1000_0001_00000101_00000000_00000010;     //  sll 5 0 0x2		;
-        {instr_mem[10'd207], instr_mem[10'd206], instr_mem[10'd205], instr_mem[10'd204]} = 32'b1001_0001_00000110_00000000_00000011;     //  slr 6 0 0x3		;
-        {instr_mem[10'd211], instr_mem[10'd210], instr_mem[10'd209], instr_mem[10'd208]} = 32'b1011_0001_00000111_00000000_00000111;     //  ror 7 0 0x7		;
-        {instr_mem[10'd215], instr_mem[10'd214], instr_mem[10'd213], instr_mem[10'd212]} = 32'b1101_0001_00000100_00000000_00000010;     //  sal 4 0 0x2		;
+        {instr_mem[10'd203], instr_mem[10'd202], instr_mem[10'd201], instr_mem[10'd200]} = 32'b0000_1011_00000000_00000110_00000110;     //  swi 5 0x6		;
+        {instr_mem[10'd207], instr_mem[10'd206], instr_mem[10'd205], instr_mem[10'd204]} = 32'b0000_1010_00000000_00000100_00000100;     //  swd 3 4		;
+        {instr_mem[10'd211], instr_mem[10'd210], instr_mem[10'd209], instr_mem[10'd208]} = 32'b0000_0010_00000110_00000100_00000010;     //  add 6 4 2 		;
+        {instr_mem[10'd215], instr_mem[10'd214], instr_mem[10'd213], instr_mem[10'd212]} = 32'b0000_1001_00000001_00000000_00000110;     //  lwi 1 0x6		;
 
 
         // METHOD 2: loading instr_mem content from instr_mem.mem files
@@ -51,9 +52,17 @@ module cpu_tb;
      CPU
     -----
     */
-    cpu mycpu(PC, INSTRUCTION, CLK, RESET);
-    data_memory myDataMemory(CLK, RESET, MEM_READ_ENABLE, MEM_WRITE_ENABLE, RESULT, OUT1, MDREAD , BUSYWAIT); // Data memory module
+    wire MEM_READ_ENABLE, MEM_WRITE_ENABLE, MEM_BUSYWAIT;
+    wire [31:0] MEM_WRITE_DATA, MEM_READ_DATA;
+    wire [5:0] MEM_ADDRESS;
+    wire CACHE_READ_ENABLE, CACHE_WRITE_ENABLE, BUSYWAIT;
+    wire [7:0] CACHE_WRITE_DATA, CACHE_READ_DATA;
+    wire [7:0] CACHE_ADDRESS;
 
+    cpu mycpu(PC,CACHE_READ_ENABLE, CACHE_WRITE_ENABLE, CACHE_WRITE_DATA, CACHE_ADDRESS, INSTRUCTION, CACHE_READ_DATA, BUSYWAIT, CLK, RESET);
+    data_memory myDataMemory(CLK, RESET, MEM_READ_ENABLE, MEM_WRITE_ENABLE, MEM_ADDRESS, MEM_WRITE_DATA, MEM_READ_DATA , BUSYWAIT); // Data memory module
+    dcache cache_memory(CLK, RESET, CACHE_READ_ENABLE, CACHE_WRITE_ENABLE, CACHE_ADDRESS, CACHE_WRITE_DATA, CACHE_READ_DATA, BUSYWAIT, 
+                        MEM_BUSYWAIT, MEM_READ_DATA, MEM_WRITE_DATA, MEM_ADDRESS, MEM_READ_ENABLE, MEM_WRITE_ENABLE);
 
     // always @(posedge CLK ) begin
         
@@ -75,7 +84,7 @@ module cpu_tb;
         #5 RESET = 0;
         
         // finish simulation after some time
-        #100
+        #500
         $finish;
         
     end

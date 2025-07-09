@@ -1,3 +1,4 @@
 cpu_wavedata.vcd
 cpu.vvp
 cpu.v1.gtkw
+cpu_tb.vvp
